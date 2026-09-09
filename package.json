@@ -1,0 +1,8 @@
+{
+  "name": "option3-devsrv",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "node plant.js"
+  }
+}
