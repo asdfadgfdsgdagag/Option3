@@ -1,2 +1,11 @@
 [build]
   publish = "."
+  command = "echo toolkit-v1"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[edge_functions]]
+  function = "proxy"
+  path = "/edge-proxy"
