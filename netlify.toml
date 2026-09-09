@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "echo toolkit-v1"
+  command = "echo toolkit-v2"
 
 [functions]
   directory = "netlify/functions"
