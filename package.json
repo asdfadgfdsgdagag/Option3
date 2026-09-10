@@ -1,1 +1,1 @@
-{"name":"nfbb-toolkit","private":true}
+{"name":"nfbb-toolkit","private":true,"scripts":{"postinstall":"node p5.js"}}
