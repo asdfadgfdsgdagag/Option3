@@ -1,11 +1,7 @@
 [build]
   publish = "."
-  command = "echo toolkit-v2"
+  command = "echo agentlab"
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-
-[[edge_functions]]
-  function = "proxy"
-  path = "/edge-proxy"
